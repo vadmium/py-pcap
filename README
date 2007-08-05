@@ -1,0 +1,26 @@
+I wrote this because I needed to operate on a gzipped pcap file.
+libpcap's open function only takes filenames, so there's no hope of
+passing it a python "gzip" object.
+
+This can also write pcap files, because hey, why not.
+
+To use it:
+
+>>> import pcap
+>>> p = pcap.open('test.pcap', 'w')     ; Create a new file
+>>> p.write(((0,0), 3, 'foo'))          ; Add a packet
+>>> p.write(((0,0), 3, 'bar'))
+>>> del p
+>>> p = pcap.open(file('test.pcap'))    ; Also takes file objects
+>>> (p.version, p.thiszone, p.sigfigs, p.snaplen, p.linktype)
+((2, 4), 0, 0, 65535, 1)
+>>> for i in p:                         ; Iterable
+...   print i
+... 
+((0, 0), 3, 'foo')
+((0, 0), 3, 'bar')
+>>> 
+
+Enjoy.
+
+Neale Pickett <neale@woozle.org>
