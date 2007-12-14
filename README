@@ -8,8 +8,8 @@ To use it:
 
 >>> import pcap
 >>> p = pcap.open('test.pcap', 'w')     ; Create a new file
->>> p.write(((0,0), 3, 'foo'))          ; Add a packet
->>> p.write(((0,0), 3, 'bar'))
+>>> p.write(((0, 0, 3), 'foo'))          ; Add a packet
+>>> p.write(((0, 0, 3), 'bar'))
 >>> del p
 >>> p = pcap.open(file('test.pcap'))    ; Also takes file objects
 >>> (p.version, p.thiszone, p.sigfigs, p.snaplen, p.linktype)
@@ -17,8 +17,8 @@ To use it:
 >>> for i in p:                         ; Iterable
 ...   print i
 ... 
-((0, 0), 3, 'foo')
-((0, 0), 3, 'bar')
+((0, 0, 3), 'foo')
+((0, 0, 3), 'bar')
 >>> 
 
 Enjoy.

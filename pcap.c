@@ -60,8 +60,6 @@ struct pcap_pkthdr {
 #define ss(i) (self->swap ? btols(i) : (i))
 
 
-
-
 typedef struct {
   PyObject_HEAD
   /* Type-specific fields go here. */
@@ -274,7 +272,7 @@ pcap_PcapObject_read(PyObject *p)
     if (! pBuf) break;
     Py_INCREF(pBuf);
 
-    pRet = Py_BuildValue("(ll)lO",
+    pRet = Py_BuildValue("(lll)O",
                          sl(hdr->ts.tv_sec),
                          sl(hdr->ts.tv_usec),
                          sl(hdr->len),
@@ -311,7 +309,7 @@ pcap_PcapObject_write(PyObject *p, PyObject *args)
       break;
     }
 
-    tmp = PyArg_ParseTuple(args, "((ll)ls#)",
+    tmp = PyArg_ParseTuple(args, "((lll)s#)",
                            &(hdr.ts.tv_sec), &(hdr.ts.tv_usec),
                            &(hdr.len),
                            &buf, &(hdr.caplen));
@@ -389,6 +387,7 @@ static PyObject *pcap_PcapObject_iter(PyObject *);
 static struct PyMethodDef
 pcap_PcapObject_methods[] = {
   {"read", (PyCFunction)pcap_PcapObject_read, METH_NOARGS, "Read a packet"},
+  {"next", (PyCFunction)pcap_PcapObject_read, METH_NOARGS, "Read a packet"},
   {"write", (PyCFunction)pcap_PcapObject_write, METH_VARARGS, "Write a packet"},
   {NULL}  /* Sentinel */
 };
@@ -577,7 +576,22 @@ initpcap(void)
   m = Py_InitModule3("pcap", pcap_methods,
                      "Reads pcap files in a less-sucky way");
 
+  {
+    PyObject *version;
+
+    version = Py_BuildValue("ii", 2, 0);
+    PyModule_AddObject(m, "version", version); /* Steals reference */
+  }
+
+  /* It's probably not strictly necessary to incref each time, since
+     it's not possible to delete these. */
+
   Py_INCREF(&pcap_PcapType);
   PyModule_AddObject(m, "pcap", (PyObject *)&pcap_PcapType);
+
+  Py_INCREF(&pcap_PcapType);
   PyModule_AddObject(m, "open", (PyObject *)&pcap_PcapType);
+
+  Py_INCREF(&pcap_PcapType);
+  PyModule_AddObject(m, "open_offline", (PyObject *)&pcap_PcapType);
 }
