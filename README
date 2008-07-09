@@ -1,5 +1,8 @@
 == Python pcap file library ==
 
+This is a pcap file reader and writer which doesn't need libpcap.  The
+read interface is similar to that of pcapy.
+
 I wrote this because I needed to operate on a gzipped pcap file.
 libpcap's open function only takes filenames, so there's no hope of
 passing it a python "gzip" object.
