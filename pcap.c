@@ -18,8 +18,26 @@
  **/
 
 #include <Python.h>
-#include <stdint.h>
 #include "obj.h"
+
+/* Define some types (Windows doesn't have stdint.h).  Let's hope
+   everything uses an 8-bit byte. */
+#if SIZEOF_LONG == 4
+typedef unsigned long uint32_t;
+#elif SIZEOF_INT == 4
+typedef unsigned int uint32_t;
+#else
+#  error "What's uint32 on this system?"
+#endif
+
+#if SIZEOF_INT == 2
+typedef unsigned int uint16_t;
+#elif SIZEOF_SHORT == 2
+typedef unsigned short uint16_t;
+#else
+#  error "What's uint16 on this system?"
+#endif
+
 
 /* We only need two data structures from pcap.h.  We do the rest
    ourselves. */
