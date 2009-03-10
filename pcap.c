@@ -24,16 +24,20 @@
    everything uses an 8-bit byte. */
 #if SIZEOF_LONG == 4
 typedef unsigned long uint32_t;
+typedef long int32_t;
 #elif SIZEOF_INT == 4
 typedef unsigned int uint32_t;
+typedef int int32_t;
 #else
 #  error "What's uint32 on this system?"
 #endif
 
 #if SIZEOF_INT == 2
 typedef unsigned int uint16_t;
+typedef int int16_t;
 #elif SIZEOF_SHORT == 2
 typedef unsigned short uint16_t;
+typedef short int16_t;
 #else
 #  error "What's uint16 on this system?"
 #endif
