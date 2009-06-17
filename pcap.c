@@ -23,21 +23,21 @@
 /* Define some types (Windows doesn't have stdint.h).  Let's hope
    everything uses an 8-bit byte. */
 #if SIZEOF_LONG == 4
-typedef unsigned long uint32_t;
-typedef long int32_t;
+typedef unsigned long _uint32_t;
+typedef long _int32_t;
 #elif SIZEOF_INT == 4
-typedef unsigned int uint32_t;
-typedef int int32_t;
+typedef unsigned int _uint32_t;
+typedef int _int32_t;
 #else
 #  error "What's uint32 on this system?"
 #endif
 
 #if SIZEOF_INT == 2
-typedef unsigned int uint16_t;
-typedef int int16_t;
+typedef unsigned int _uint16_t;
+typedef int _int16_t;
 #elif SIZEOF_SHORT == 2
-typedef unsigned short uint16_t;
-typedef short int16_t;
+typedef unsigned short _uint16_t;
+typedef short _int16_t;
 #else
 #  error "What's uint16 on this system?"
 #endif
@@ -47,27 +47,27 @@ typedef short int16_t;
    ourselves. */
 
 struct pcap_file_header {
-  uint32_t magic;
-  uint16_t version_major;
-  uint16_t version_minor;
-  int32_t  thiszone;            /* gmt to local correction */
-  uint32_t sigfigs;             /* accuracy of timestamps */
-  int32_t  snaplen;             /* max length saved portion of each pkt */
-  int32_t  linktype;            /* data link type (LINKTYPE_*) */
+  _uint32_t magic;
+  _uint16_t version_major;
+  _uint16_t version_minor;
+  _int32_t  thiszone;            /* gmt to local correction */
+  _uint32_t sigfigs;             /* accuracy of timestamps */
+  _int32_t  snaplen;             /* max length saved portion of each pkt */
+  _int32_t  linktype;            /* data link type (LINKTYPE_*) */
 };
 
 /* So things still work on 64-bit CPUs.
    Note that this makes the program not Y2038-safe!
   */
 struct pcap_timeval {
-  uint32_t tv_sec;
-  uint32_t tv_usec;
+  _uint32_t tv_sec;
+  _uint32_t tv_usec;
 };
 
 struct pcap_pkthdr {
   struct pcap_timeval ts;       /* time stamp */
-  uint32_t            caplen;   /* length of portion present */
-  uint32_t            len;      /* length this packet (off wire) */
+  _uint32_t            caplen;   /* length of portion present */
+  _uint32_t            len;      /* length this packet (off wire) */
 };
 
 
@@ -131,17 +131,16 @@ pcap_PcapObject_init(PyObject *p,
 {
   pcap_PcapObject *self     = (pcap_PcapObject *)p;
   static char     *kwlist[] = {"src", "mode", "snaplen", "linktype", NULL};
-  char             mode     = 0;
-  uint32_t         snaplen  = 65535;
-  uint32_t         linktype = 1;
+  char            *mode     = NULL;
+  _uint32_t        snaplen  = 65535;
+  _uint32_t        linktype = 1;
   PyObject        *pTmp     = NULL;
   PyObject        *pFile;       /* Don't decref, it's borrowed! */
 
   attempt {
     int tmp;
-    char modestr[2];
 
-    tmp = PyArg_ParseTupleAndKeywords(args, kwds, "O|cll", kwlist, &pFile, &mode, &snaplen, &linktype);
+    tmp = PyArg_ParseTupleAndKeywords(args, kwds, "O|sll", kwlist, &pFile, &mode, &snaplen, &linktype);
     if (! tmp) break;
 
     if (PyString_Check(pFile)) {
@@ -150,13 +149,11 @@ pcap_PcapObject_init(PyObject *p,
       fn = PyString_AsString(pFile);
       if (! fn) break;
 
-      if (0 == mode) {
-        mode = 'r';
+      if (NULL == mode) {
+        mode = "rb";
       }
-      modestr[0] = mode;
-      modestr[1] = '\0';
 
-      pFile = PyFile_FromString(fn, modestr);
+      pFile = PyFile_FromString(fn, mode);
       if (! pFile) break;
 
       self->pFile = pFile;
@@ -165,7 +162,7 @@ pcap_PcapObject_init(PyObject *p,
       Py_INCREF(self->pFile);
     }
 
-    if (('r' == mode) || (0 == mode)) {
+    if ((! mode) || ('r' == mode[0])) {
       /* Try to read in the header. */
 
       pTmp = PyObject_CallMethod(pFile, "read", "i", sizeof(self->header));
@@ -173,19 +170,20 @@ pcap_PcapObject_init(PyObject *p,
         /* If we're in auto-detect mode... */
         if (pTmp) {
           /* And it worked, then we become read-only */
-          mode = 'r';
+          self->mode = 'r';
         } else {
           /* And it didn't work, then we become write-only */
           PyErr_Clear();
-          mode = 'w';
+          self->mode = 'w';
         }
+      } else {
+        self->mode = mode[0];
       }
+    } else {
+      self->mode = mode[0];
     }
 
-    /* At this point, mode has been set appropriately */
-    self->mode = mode;
-
-    if ('r' == mode) {
+    if ('r' == self->mode) {
       if (! pTmp) break;
 
       {
@@ -214,7 +212,7 @@ pcap_PcapObject_init(PyObject *p,
         PyErr_Format(PyExc_IOError, "Not a pcap file");
         break;
       }
-    } else if ('w' == mode) {
+    } else if ('w' == self->mode) {
       /* Write out header */
 
       memset(&(self->header), 0, sizeof(self->header));
