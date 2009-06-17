@@ -425,7 +425,7 @@ pcap_PcapObject_getset[] = {
 
 
 static PyTypeObject pcap_PcapType = {
-  PyObject_HEAD_INIT(&PyType_Type)
+  PyObject_HEAD_INIT(NULL)
   0,                            /* ob_size */
   "pcap.pcap",                  /* tp_name */
   sizeof(pcap_PcapObject),      /* tp_basicsize */
