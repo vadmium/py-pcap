@@ -290,7 +290,6 @@ pcap_PcapObject_read(PyObject *p)
 
     pBuf = PyObject_CallMethod(self->pFile, "read", "i", sl(hdr->caplen));
     if (! pBuf) break;
-    Py_INCREF(pBuf);
 
     pRet = Py_BuildValue("(lll)O",
                          sl(hdr->ts.tv_sec),
