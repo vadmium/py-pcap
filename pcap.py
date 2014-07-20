@@ -2,12 +2,17 @@
 
 import struct
 
+try:  # Python 3
+    import builtins
+except ImportError:  # Python < 3
+    import __builtin__ as builtins
+
 _MAGIC = 0xA1B2C3D4
 
 class pcap:
     def __init__(self, stream, mode='rb', snaplen=65535, linktype=1):
         try:
-            self.stream = __builtins__.open(stream, mode)
+            self.stream = builtins.open(stream, mode)
         except TypeError:
             self.stream = stream
         try:
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     p.write(((0, 0, 3), b'foo')) # Add a packet
     p.write(((0, 0, 3), b'bar'))
     del p
-    p = open(__builtins__.open('test.pcap', 'rb')) # Also takes file objects
+    p = open(builtins.open('test.pcap', 'rb')) # Also takes file objects
     assert ((p.version, p.thiszone, p.sigfigs, p.snaplen, p.linktype) ==
             ((2, 4), 0, 0, 65535, 1))
     assert ([i for i in p] == [((0, 0, 3), b'foo'), ((0, 0, 3), b'bar')])
