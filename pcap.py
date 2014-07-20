@@ -156,11 +156,7 @@ class pcap:
         self.stream.write(datum)
 
     def __iter__(self):
-        while True:
-            r = self.read()
-            if not r:
-                break
-            yield r
+        return iter(self.read, None)
 
 
 open = pcap
