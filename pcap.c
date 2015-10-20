@@ -189,7 +189,7 @@ pcap_PcapObject_init(PyObject *p,
       {
         int   tmp;
         char *buf;
-        int   len;
+        Py_ssize_t len;
 
         tmp = PyString_AsStringAndSize(pTmp, &buf, &len);
         if (-1 == tmp) {
@@ -262,7 +262,7 @@ pcap_PcapObject_read(PyObject *p)
 
     {
       char *buf;
-      int   len;
+      Py_ssize_t len;
       int   tmp;
 
       tmp = PyString_AsStringAndSize(pTmp, &buf, &len);
@@ -278,7 +278,7 @@ pcap_PcapObject_read(PyObject *p)
       }
 
       if (len != sizeof(*hdr)) {
-        PyErr_Format(PyExc_IOError, "Read returned wrong number of bytes (%d)", len);
+        PyErr_Format(PyExc_IOError, "Read returned wrong number of bytes (%zd)", len);
         break;
       }
 
